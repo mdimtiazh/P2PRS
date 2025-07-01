@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Prompt to PPT Generator</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 2rem; background: #f5f7fa; }
+    h1 { color: #333; }
+    label { display: block; margin: 1rem 0 0.3rem; }
+    select, textarea, input, button {
+      width: 100%; padding: 0.5rem; font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    #result { margin-top: 2rem; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+  <h1>AI-Powered Prompt-to-PPT Generator</h1>
+
+  <form id="pptForm">
+    <label for="level">Academic Level</label>
+    <select id="level" required>
+      <option value="Bachelor">Bachelor</option>
+      <option value="Master">Master</option>
+      <option value="PhD">PhD</option>
+      <option value="Postdoc">Postdoc</option>
+      <option value="Professor">Professor</option>
+      <option value="Scientist">Scientist</option>
+    </select>
+
+    <label for="field">Field of Study</label>
+    <input type="text" id="field" placeholder="e.g. Artificial Intelligence" required />
+
+    <label for="prompt">Presentation Topic / Prompt</label>
+    <textarea id="prompt" rows="6" placeholder="e.g. Recent advances in generative AI" required></textarea>
+
+    <button type="submit">Generate Presentation</button>
+  </form>
+
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById('pptForm');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const level = document.getElementById('level').value;
+      const field = document.getElementById('field').value;
+      const prompt = document.getElementById('prompt').value;
+
+      resultDiv.innerHTML = "Generating your presentation... please wait ⏳";
+
+      try {
+        const response = await fetch('http://163.180.117.216:8000/generate-ppt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ level, field, prompt })
+        });
+
+        const data = await response.json();
+
+        if (data.ppt_url) {
+          const downloadLink = `http://163.180.117.216:8000${data.ppt_url}`;
+          resultDiv.innerHTML = `
+            ✅ Your presentation is ready!<br>
+            <a href="${downloadLink}" download="presentation.pptx">Click here to download 📥</a>
+          `;
+        } else {
+          resultDiv.innerHTML = "❌ Failed to generate presentation.";
+        }
+      } catch (error) {
+        console.error(error);
+        resultDiv.innerHTML = "❌ Error occurred. Please try again.";
+      }
+    });
+  </script>
+
+</body>
+</html>
+
